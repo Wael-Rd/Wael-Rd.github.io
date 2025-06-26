@@ -51,7 +51,7 @@ Our team designed a state-of-the-art network to enable seamless, secure communic
 ## Team in Action
 
 Here’s a glimpse of our incredible team powering through the hackathon:
-Wael Rdifi,Hamzaoui Mohammed , Ale Naoui , Wiem ,Ahmed Rayen Ayari !*
+Hamzaoui Mohammed , Ale Naoui , Wiem ,Ahmed Rayen Ayari !*
 
 ---
 
