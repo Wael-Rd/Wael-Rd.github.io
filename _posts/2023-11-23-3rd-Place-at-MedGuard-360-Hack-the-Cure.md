@@ -51,9 +51,7 @@ Our team designed a state-of-the-art network to enable seamless, secure communic
 ## Team in Action
 
 Here’s a glimpse of our incredible team powering through the hackathon:
-
-![Team Picture](https://camo.githubusercontent.com/8fec6a37656edb474b52b53265e643d0150e74e7c5e10a6fc84ff20f68256ade/68747470733a2f2f697368616d7a616f75692e6769746875622e696f2f696d616765732f636f6d7065746974696f6e732f4d656447756172642f696d67312e6a7067)  
-*From left to right : Hamzaoui Mohammed , Ale Naoui , Wiem ,Ahmed Rayen Ayari , and me Wael Rdifi!*
+Wael Rdifi,Hamzaoui Mohammed , Ale Naoui , Wiem ,Ahmed Rayen Ayari !*
 
 ---
 
